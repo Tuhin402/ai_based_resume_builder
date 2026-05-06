@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const resumeRoutes = require("./routes/resumeRoutes");
+const stripeRoutes = require("./routes/stripeRoutes");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", resumeRoutes);
+app.use("/api/stripe", stripeRoutes);
 
 // --- Global error handler ---
 app.use((err, req, res, next) => {

@@ -156,8 +156,7 @@
   color: inherit;
 }
 
-/* Auth skeleton — shown while Firebase resolves auth.
-   Same size as avatar so layout doesn't shift. */
+/* Auth skeleton — shown while Firebase resolves auth. */
 .header-auth-skeleton {
   width: 36px;
   height: 36px;
@@ -167,3 +166,47 @@
   flex-shrink: 0;
   animation: pulse 1.4s ease-in-out infinite;
 }
+
+/* Pro badge */
+.header-pro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--gradient-accent);
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(124,58,237,0.4);
+  cursor: default;
+}
+
+/* Upgrade button (header) */
+.header-upgrade-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  background: linear-gradient(135deg, rgba(234,179,8,0.15), rgba(251,191,36,0.10));
+  border: 1px solid rgba(234,179,8,0.40);
+  border-radius: var(--radius-full);
+  font-family: var(--font-family);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: #fbbf24;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.header-upgrade-btn:hover {
+  background: linear-gradient(135deg, rgba(234,179,8,0.25), rgba(251,191,36,0.18));
+  box-shadow: 0 0 20px rgba(234,179,8,0.2);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .header-upgrade-btn span { display: none; }
+  .header-pro-badge span   { display: none; }
+}
+

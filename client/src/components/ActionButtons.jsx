@@ -1,4 +1,4 @@
-import { Sparkles, BarChart3, Compass, Download, Loader2 } from 'lucide-react';
+import { Sparkles, BarChart3, Compass, Download, Loader2, Crown, Lock } from 'lucide-react';
 import './ActionButtons.css';
 
 export default function ActionButtons({
@@ -8,7 +8,12 @@ export default function ActionButtons({
   onDownload,
   loading,
   hasPreview,
+  isPro        = false,
+  downloadsLeft  = 0,
+  downloadsLimit = 10,
 }) {
+  const downloadsUsed = downloadsLimit - downloadsLeft;
+
   return (
     <div className="action-buttons" id="action-buttons">
       {/* Primary CTA */}
@@ -54,13 +59,30 @@ export default function ActionButtons({
       {/* Download */}
       {hasPreview && (
         <button
-          className="btn btn-ghost btn-lg action-btn download-btn"
+          className={`btn btn-lg action-btn download-btn ${isPro ? 'btn-ghost' : 'btn-download-locked'}`}
           onClick={onDownload}
           id="btn-download"
         >
-          <Download size={18} />
-          Download PDF
+          {isPro ? <Download size={18} /> : <Crown size={18} className="crown-gold" />}
+          {isPro
+            ? `Download PDF`
+            : 'Download PDF — Pro Only'}
         </button>
+      )}
+
+      {/* Download usage meter (Pro users) */}
+      {isPro && hasPreview && (
+        <div className="download-meter">
+          <div className="download-meter-bar">
+            <div
+              className="download-meter-fill"
+              style={{ width: `${Math.min(100, (downloadsUsed / downloadsLimit) * 100)}%` }}
+            />
+          </div>
+          <span className="download-meter-label">
+            {downloadsLeft} of {downloadsLimit} downloads left
+          </span>
+        </div>
       )}
     </div>
   );

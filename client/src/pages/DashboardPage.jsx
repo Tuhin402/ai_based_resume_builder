@@ -6,6 +6,8 @@ import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import ResumeCard from '../components/ResumeCard';
 import Modal from '../components/Modal';
+import PromoModal from '../components/PromoModal';
+import AuthModal from '../components/AuthModal';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeToUserResumes, deleteResume } from '../firebase/resumeService';
 import './DashboardPage.css';
@@ -15,8 +17,10 @@ export default function DashboardPage() {
   const navigate     = useNavigate();
   const [resumes,    setResumes]    = useState([]);
   const [loading,    setLoading]    = useState(true);
-  const [deleting,   setDeleting]   = useState(null);   // { id, title }
-  const [isDeleting, setIsDeleting] = useState(false);  // button loading state
+  const [deleting,   setDeleting]   = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showPromo,  setShowPromo]  = useState(false);
+  const [showAuth,   setShowAuth]   = useState(false);
 
   // Real-time Firestore subscription (IndexedDB cache included)
   useEffect(() => {
@@ -54,10 +58,10 @@ export default function DashboardPage() {
         style: { background: '#12122a', color: '#f0f0fa', border: '1px solid rgba(168,85,247,0.22)', borderRadius: '12px', fontFamily: 'var(--font-family)' },
       }} />
 
-      <Header />
+      <Header onUpgradeClick={() => setShowPromo(true)} />
 
       <div className="dashboard-body">
-        <Sidebar />
+        <Sidebar onUpgradeClick={() => setShowPromo(true)} />
 
         <main className="dashboard-main">
           {/* Page header */}
@@ -153,6 +157,14 @@ export default function DashboardPage() {
           </div>
         </div>
       </Modal>
+
+      <PromoModal
+        isOpen={showPromo}
+        onClose={() => setShowPromo(false)}
+        onLoginRequired={() => { setShowPromo(false); setShowAuth(true); }}
+      />
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
 }
+

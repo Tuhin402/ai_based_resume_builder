@@ -4,13 +4,17 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import { SubscriptionProvider } from './contexts/SubscriptionContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <SubscriptionProvider>
+          <App />
+        </SubscriptionProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 );
+

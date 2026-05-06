@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
-import { Save, BarChart3, Compass } from 'lucide-react';
+import { Save, BarChart3, Compass, Crown, Layout } from 'lucide-react';
 import Header from '../components/Header';
 import FileUpload from '../components/FileUpload';
 import ResumeForm from '../components/ResumeForm';
@@ -10,10 +10,14 @@ import ActionButtons from '../components/ActionButtons';
 import GradeResults from '../components/GradeResults';
 import JobSuggestions from '../components/JobSuggestions';
 import AuthModal from '../components/AuthModal';
+import PromoModal from '../components/PromoModal';
+import TemplateSelector from '../components/TemplateSelector';
 import Modal from '../components/Modal';
 import { parseResume, generateResume, gradeResume, suggestJobs } from '../api/resumeApi';
 import { useAuth } from '../contexts/AuthContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
 import { saveResume, getResume } from '../firebase/resumeService';
+import { incrementDownloadCount, trackTemplateUsage } from '../firebase/subscriptionService';
 import '../App.css';
 
 const INITIAL_RESUME = {
@@ -24,24 +28,27 @@ const INITIAL_RESUME = {
   education: [],
   projects: [],
   certifications: [],
+  template: 'default',
 };
 
 export default function BuilderPage() {
-  const { user }                = useAuth();
-  const { resumeId }            = useParams();
-  const [searchParams]          = useSearchParams();
-  const navigate                = useNavigate();
+  const { user }      = useAuth();
+  const { isPro, canDownload, downloadsLeft, downloadsLimit } = useSubscription();
+  const { resumeId }  = useParams();
+  const [searchParams] = useSearchParams();
+  const navigate       = useNavigate();
 
-  const [resumeData, setResumeData]   = useState(INITIAL_RESUME);
-  const [currentId,  setCurrentId]    = useState(resumeId || null);
-  const [gradeData,  setGradeData]    = useState(null);
-  const [jobData,    setJobData]      = useState(null);
-  const [isParsing,  setIsParsing]    = useState(false);
-  const [isSaving,   setIsSaving]     = useState(false);
-  const [activeModal,setActiveModal]  = useState(null); // 'grade'|'jobs'|'auth'
+  const [resumeData,  setResumeData]  = useState(INITIAL_RESUME);
+  const [currentId,   setCurrentId]   = useState(resumeId || null);
+  const [gradeData,   setGradeData]   = useState(null);
+  const [jobData,     setJobData]     = useState(null);
+  const [isParsing,   setIsParsing]   = useState(false);
+  const [isSaving,    setIsSaving]    = useState(false);
+  const [showTmpl,    setShowTmpl]    = useState(false);
+  const [activeModal, setActiveModal] = useState(null); // 'grade'|'jobs'|'auth'|'promo'
   const [loading, setLoading] = useState({ generate: false, grade: false, suggest: false });
 
-  // Load existing resume when editing (/builder/:resumeId)
+  // Load existing resume when editing
   useEffect(() => {
     if (!resumeId) return;
     (async () => {
@@ -65,7 +72,6 @@ export default function BuilderPage() {
     resumeData.experience.length > 0 ||
     resumeData.skills.length > 0;
 
-  // Deep update helper
   const update = useCallback((path, value) => {
     setResumeData(prev => {
       const keys = path.split('.');
@@ -80,13 +86,22 @@ export default function BuilderPage() {
     });
   }, []);
 
+  // Template selection
+  const handleSelectTemplate = useCallback((templateId) => {
+    setResumeData(prev => ({ ...prev, template: templateId }));
+    if (user && isPro) {
+      trackTemplateUsage(user.uid, templateId).catch(() => {});
+    }
+    toast.success(`Template changed to ${templateId}`, { id: 'tmpl', duration: 1500 });
+  }, [user, isPro]);
+
   // File upload → parse resume
   const handleFileUpload = useCallback(async (file) => {
     setIsParsing(true);
     toast.loading('Parsing your resume…', { id: 'parse' });
     try {
       const result = await parseResume(file);
-      setResumeData(result);
+      setResumeData(prev => ({ ...result, template: prev.template }));
       toast.success('Resume imported!', { id: 'parse' });
     } catch (err) {
       toast.error(err.message || 'Failed to parse resume', { id: 'parse' });
@@ -121,7 +136,7 @@ export default function BuilderPage() {
     toast.loading('Enhancing with AI…', { id: 'generate' });
     try {
       const result = await generateResume(resumeData);
-      setResumeData(result);
+      setResumeData(prev => ({ ...result, template: prev.template }));
       toast.success('Resume enhanced!', { id: 'generate' });
     } catch (err) {
       toast.error(err.message || 'Failed to generate resume', { id: 'generate' });
@@ -164,43 +179,53 @@ export default function BuilderPage() {
     }
   }, [resumeData, hasContent]);
 
-  // PDF download — requires auth
+  // ── PDF Download ──────────────────────────────────────────────────────────
   const handleDownload = useCallback(async () => {
+    // 1. Auth gate
     if (!user) { setActiveModal('auth'); return; }
+    // 2. Pro gate
+    if (!isPro) { setActiveModal('promo'); return; }
+    // 3. Download limit gate
+    if (!canDownload) {
+      toast.error(`Download limit reached (${downloadsLimit}/30 days). Your limit resets with the next period.`);
+      return;
+    }
     if (!hasContent) return toast.error('Add resume content before downloading');
-    toast.loading('Generating PDF…', { id: 'pdf' });
 
-    let clone = null;
+    toast.loading('Generating PDF…', { id: 'pdf' });
+    const el = document.getElementById('preview-page');
+    if (!el) { toast.error('Preview not found', { id: 'pdf' }); return; }
+
+    // Temporarily expand element for full capture (fix blank page issue)
+    const prevMaxH    = el.style.maxHeight;
+    const prevOverflow = el.style.overflowY;
+    el.classList.add('print-mode');
+
+    // Give browser a frame to reflow
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
     try {
       const html2pdf = (await import('html2pdf.js')).default;
-      const original = document.querySelector('.preview-page');
-      if (!original) throw new Error('Preview element not found');
-
-      clone = original.cloneNode(true);
-      Object.assign(clone.style, {
-        position: 'fixed', top: '0', left: '0',
-        width: original.scrollWidth + 'px',
-        zIndex: '-9999', opacity: '0.01', pointerEvents: 'none',
-      });
-      document.body.appendChild(clone);
-      await new Promise(r => setTimeout(r, 150));
-
       await html2pdf().set({
-        margin: 0,
-        filename: `${resumeData.personalInfo.name || 'resume'}.pdf`,
-        image:       { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, windowHeight: clone.scrollHeight },
-        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      }).from(clone).save();
+        margin:       [10, 10, 10, 10], // mm
+        filename:     `${resumeData.personalInfo.name || 'resume'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      }).from(el).save();
 
+      // Increment usage count
+      await incrementDownloadCount(user.uid);
       toast.success('PDF downloaded!', { id: 'pdf' });
     } catch (err) {
       toast.error('Failed to generate PDF', { id: 'pdf' });
       console.error('PDF error:', err);
     } finally {
-      if (clone?.parentNode) clone.parentNode.removeChild(clone);
+      el.classList.remove('print-mode');
+      el.style.maxHeight = prevMaxH;
+      el.style.overflowY = prevOverflow;
     }
-  }, [user, resumeData.personalInfo.name, hasContent]);
+  }, [user, isPro, canDownload, hasContent, resumeData.personalInfo.name, downloadsLimit]);
 
   const closeModal = () => setActiveModal(null);
 
@@ -210,7 +235,7 @@ export default function BuilderPage() {
         style: { background: '#12122a', color: '#f0f0fa', border: '1px solid rgba(168,85,247,0.22)', borderRadius: '12px', fontSize: '0.875rem', fontFamily: 'var(--font-family)', boxShadow: '0 8px 32px rgba(0,0,0,0.45)' },
       }} />
 
-      <Header />
+      <Header onUpgradeClick={() => setActiveModal('promo')} />
 
       <main className="app-main">
         {/* Left sidebar */}
@@ -220,9 +245,31 @@ export default function BuilderPage() {
             isLoading={isParsing}
             autoOpen={searchParams.get('upload') === '1'}
           />
+
+          {/* Template Selector (shown when toggled) */}
+          <div className="builder-tmpl-toggle">
+            <button
+              className={`btn btn-secondary btn-sm ${showTmpl ? 'btn-active' : ''}`}
+              onClick={() => setShowTmpl(v => !v)}
+              id="btn-toggle-templates"
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              <Layout size={14} />
+              {showTmpl ? 'Hide Templates' : 'Choose Template'}
+              {!isPro && <Crown size={12} style={{ color: '#fbbf24', marginLeft: 4 }} />}
+            </button>
+          </div>
+
+          {showTmpl && (
+            <TemplateSelector
+              currentTemplate={resumeData.template || 'default'}
+              onSelect={handleSelectTemplate}
+              onUpgradeClick={() => setActiveModal('promo')}
+            />
+          )}
+
           <ResumeForm resumeData={resumeData} setResumeData={setResumeData} />
 
-          {/* Save button */}
           {user && (
             <button
               className="btn btn-secondary btn-lg"
@@ -243,6 +290,9 @@ export default function BuilderPage() {
             onDownload={handleDownload}
             loading={loading}
             hasPreview={!!hasContent}
+            isPro={isPro}
+            downloadsLeft={downloadsLeft}
+            downloadsLimit={downloadsLimit}
           />
         </aside>
 
@@ -252,18 +302,22 @@ export default function BuilderPage() {
         </section>
       </main>
 
-      {/* Grade modal */}
+      {/* Modals */}
       <Modal isOpen={activeModal === 'grade'} onClose={closeModal} title="ATS Resume Grade" icon={BarChart3}>
         <GradeResults gradeData={gradeData} />
       </Modal>
 
-      {/* Jobs modal */}
       <Modal isOpen={activeModal === 'jobs'} onClose={closeModal} title="Job Match Analysis" icon={Compass}>
         <JobSuggestions jobData={jobData} />
       </Modal>
 
-      {/* Auth gate modal — triggered when guest tries to download/save */}
       <AuthModal isOpen={activeModal === 'auth'} onClose={closeModal} />
+
+      <PromoModal
+        isOpen={activeModal === 'promo'}
+        onClose={closeModal}
+        onLoginRequired={() => setActiveModal('auth')}
+      />
     </div>
   );
 }

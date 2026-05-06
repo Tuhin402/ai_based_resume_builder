@@ -13,13 +13,13 @@ import {
 
 // these will be given by firebase on adding your web app
 const firebaseConfig = {
-  apiKey: "firebase_api_key",
-  authDomain: "firebase_auth_domain",
-  projectId: "firebase_project_id",
-  storageBucket: "########",
-  messagingSenderId: "########",
-  appId: "########",
-  measurementId: "########",
+  apiKey: "[GCP_API_KEY]",
+  authDomain: "airesume-d26e1.firebaseapp.com",
+  projectId: "airesume-54tge",
+  storageBucket: "airesume-d26e1.firebasestorage.app",
+  messagingSenderId: "280835018374",
+  appId: "1:534635452341363464:web:66et34y45244f335d8e3",
+  measurementId: "G-8Y0995464P",
 };
 
 const app = initializeApp(firebaseConfig);

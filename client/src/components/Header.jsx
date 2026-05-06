@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { FileText, Sparkles, Zap, LogIn } from 'lucide-react';
+import { FileText, Sparkles, Zap, LogIn, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
 import AuthModal from './AuthModal';
 import UserMenu from './UserMenu';
 import './Header.css';
 
-export default function Header() {
+export default function Header({ onUpgradeClick }) {
   const { user, loading } = useAuth();
+  const { isPro, downloadsLeft, downloadsLimit } = useSubscription();
   const [showAuth, setShowAuth] = useState(false);
 
   return (
@@ -31,7 +33,7 @@ export default function Header() {
 
           {/* Right side */}
           <div className="header-actions">
-            {/* Badges — hidden on mobile via CSS */}
+            {/* Badges */}
             <div className="header-badge header-badge-ai">
               <Zap size={12} />
               <span>AI-Powered</span>
@@ -41,16 +43,28 @@ export default function Header() {
               <span>ATS-Optimized</span>
             </div>
 
-            {/*
-              Auth state:
-              - loading → show a neutral placeholder so there's no Login flash
-              - user    → show avatar
-              - guest   → show Sign In button
-            */}
             {loading ? (
               <div className="header-auth-skeleton" aria-hidden="true" />
             ) : user ? (
-              <UserMenu />
+              <>
+                {/* Pro badge or upgrade button */}
+                {isPro ? (
+                  <div className="header-pro-badge" title={`${downloadsLeft}/${downloadsLimit} downloads left`}>
+                    <Crown size={12} />
+                    <span>Pro</span>
+                  </div>
+                ) : (
+                  <button
+                    className="header-upgrade-btn"
+                    onClick={onUpgradeClick}
+                    id="btn-header-upgrade"
+                  >
+                    <Crown size={12} />
+                    <span>Upgrade</span>
+                  </button>
+                )}
+                <UserMenu onUpgradeClick={onUpgradeClick} />
+              </>
             ) : (
               <button
                 className="btn btn-primary btn-sm header-login-btn"

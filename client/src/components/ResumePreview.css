@@ -29,200 +29,44 @@
   max-width: 280px;
 }
 
-/* --- Resume page --- */
+/* ── Resume page (A4 canvas) ────────────────────────────── */
 .preview-page {
   background: #ffffff;
   color: #1a1a2e;
   border-radius: var(--radius-md);
-  padding: 36px 40px;
+  padding: 28px 32px;       /* balanced screen padding */
   font-family: 'Inter', sans-serif;
   font-size: 11px;
   line-height: 1.55;
   box-shadow: var(--shadow-lg);
-  min-height: 500px;
+  min-height: 400px;
+  /* Allow content to expand naturally for PDF capture */
   max-height: 80vh;
   overflow-y: auto;
 }
 
 /* Scrollbar for preview */
-.preview-page::-webkit-scrollbar {
-  width: 4px;
-}
+.preview-page::-webkit-scrollbar { width: 4px; }
+.preview-page::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
-.preview-page::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 4px;
-}
-
-.preview-header {
-  text-align: center;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #1a1a2e;
-  margin-bottom: 14px;
-}
-
-.preview-name {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #1a1a2e;
-  margin-bottom: 6px;
-}
-
-.preview-contact {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-}
-
-.preview-contact-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  color: #4a4a6a;
-}
-
-/* --- Sections --- */
-.preview-section {
-  margin-bottom: 14px;
-}
-
-.preview-section-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #1a1a2e;
-  border-bottom: 1px solid #d0d0e0;
-  padding-bottom: 3px;
-  margin-bottom: 8px;
-}
-
-/* --- Skills --- */
-.preview-skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.preview-skill-tag {
-  padding: 2px 8px;
-  font-size: 10px;
-  font-weight: 500;
-  background: #f0f0f8;
-  color: #4a4a6a;
-  border-radius: 3px;
-}
-
-/* --- Entries --- */
-.preview-entry {
-  margin-bottom: 10px;
-}
-
-.preview-entry:last-child {
-  margin-bottom: 0;
-}
-
-.preview-entry-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.preview-entry-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #1a1a2e;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.preview-entry-subtitle {
-  font-size: 11px;
-  color: #6a6a8a;
-  font-weight: 500;
-}
-
-.preview-entry-date {
-  font-size: 10px;
-  color: #6a6a8a;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.preview-bullets {
-  margin: 4px 0 0 16px;
-  padding: 0;
-  list-style: disc;
-}
-
-.preview-bullets li {
-  margin-bottom: 2px;
-  font-size: 10.5px;
-  color: #2a2a4e;
-  line-height: 1.5;
-}
-
-.preview-description {
-  font-size: 10.5px;
-  color: #2a2a4e;
-  margin-top: 3px;
-}
-
-.preview-tech {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-.preview-tech-tag {
-  padding: 1px 6px;
-  font-size: 9px;
-  font-weight: 600;
-  background: #e8e8f0;
-  color: #5a5a7a;
-  border-radius: 2px;
-}
-
-.preview-link {
-  color: #6c5ce7;
-  display: inline-flex;
-}
-
-/* --- Certifications --- */
-.preview-cert {
-  margin-bottom: 3px;
-  font-size: 10.5px;
-}
-
-.preview-cert-name {
-  font-weight: 600;
-  color: #1a1a2e;
-}
-
-.preview-cert-issuer {
-  color: #6a6a8a;
-}
-
-.preview-cert-year {
-  color: #8a8aaa;
-  font-size: 10px;
+/* ── Print / PDF capture mode ───────────────────────────── */
+/* Applied programmatically before html2pdf capture */
+.preview-page.print-mode {
+  max-height: none !important;
+  overflow: visible !important;
+  /* A4 at 96dpi screen = ~794px wide; html2pdf handles scaling to PDF units */
+  width: 794px !important;
+  min-height: 1123px;
+  padding: 40px 50px !important; /* ~15mm margins */
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 @media (max-width: 768px) {
-  .resume-preview {
-    position: static;
-  }
+  .resume-preview { position: static; }
   .preview-page {
-    padding: 24px 20px;
+    padding: 20px 18px;
     font-size: 10px;
-  }
-  .preview-name {
-    font-size: 18px;
+    max-height: none;
   }
 }
