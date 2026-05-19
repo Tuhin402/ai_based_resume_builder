@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Upload, FileText, Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { PlusCircle, Upload, FileText, Loader2, Trash2, AlertTriangle, FileEdit } from 'lucide-react';
 import { Toaster, toast } from 'react-hot-toast';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
@@ -8,6 +8,7 @@ import ResumeCard from '../components/ResumeCard';
 import Modal from '../components/Modal';
 import PromoModal from '../components/PromoModal';
 import AuthModal from '../components/AuthModal';
+import ExpiryWarningBanner from '../components/ExpiryWarningBanner';
 import { useAuth } from '../contexts/AuthContext';
 import { subscribeToUserResumes, deleteResume } from '../firebase/resumeService';
 import './DashboardPage.css';
@@ -64,6 +65,7 @@ export default function DashboardPage() {
         <Sidebar onUpgradeClick={() => setShowPromo(true)} />
 
         <main className="dashboard-main">
+          <ExpiryWarningBanner onUpgradeClick={() => setShowPromo(true)} />
           {/* Page header */}
           <div className="dashboard-header">
             <div>
@@ -73,6 +75,9 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="dashboard-actions">
+              <button className="btn btn-ghost btn-sm" onClick={() => navigate('/cover-letter')} id="btn-coverletter">
+                <FileEdit size={15} /> Cover Letter
+              </button>
               <button className="btn btn-secondary" onClick={handleUpload} id="btn-upload">
                 <Upload size={16} /> Upload Resume
               </button>

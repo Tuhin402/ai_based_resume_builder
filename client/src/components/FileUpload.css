@@ -9,6 +9,16 @@
   margin-bottom: var(--space-6);
 }
 
+/* Compact variant — used inside cover letter form */
+.file-upload.compact {
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: 0;
+}
+.file-upload.compact .upload-icon-wrap { width: 32px; height: 32px; }
+.file-upload.compact .upload-title     { font-size: var(--font-xs); }
+.file-upload.compact .upload-subtitle  { font-size: 10px; }
+
+
 .file-upload:hover,
 .file-upload.drag-over {
   border-color: var(--accent-mid);

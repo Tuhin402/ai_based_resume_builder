@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, FileCheck, X } from 'lucide-react';
 import './FileUpload.css';
 
-export default function FileUpload({ onFileParsed, isLoading }) {
+export default function FileUpload({ onFileParsed, isLoading, autoOpen, compact }) {
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef(null);
@@ -56,7 +56,7 @@ export default function FileUpload({ onFileParsed, isLoading }) {
 
   return (
     <div
-      className={`file-upload glass-card ${dragOver ? 'drag-over' : ''} ${file ? 'has-file' : ''}`}
+      className={`file-upload glass-card ${dragOver ? 'drag-over' : ''} ${file ? 'has-file' : ''} ${compact ? 'compact' : ''}`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}

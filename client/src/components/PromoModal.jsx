@@ -10,12 +10,14 @@ const FEATURES_FREE = [
   'ATS grading & job match',
   'Unlimited resume saves',
   'No PDF downloads',
+  'No cover letter generation',
 ];
 
 const FEATURES_PRO = [
   '8 premium templates',
-  '10 PDF downloads / 30 days',
-  'AI content enhancement',
+  '10 resume PDF downloads / 30 days',
+  '5 cover letter PDF downloads / 30 days',
+  'AI cover letter generator',
   'ATS grading & job match',
   'Favourite templates tracking',
   'Priority support',

@@ -12,12 +12,14 @@ import JobSuggestions from '../components/JobSuggestions';
 import AuthModal from '../components/AuthModal';
 import PromoModal from '../components/PromoModal';
 import TemplateSelector from '../components/TemplateSelector';
+import ExpiryWarningBanner from '../components/ExpiryWarningBanner';
 import Modal from '../components/Modal';
 import { parseResume, generateResume, gradeResume, suggestJobs } from '../api/resumeApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { saveResume, getResume } from '../firebase/resumeService';
 import { incrementDownloadCount, trackTemplateUsage } from '../firebase/subscriptionService';
+import useSecurityDeterrents from '../hooks/useSecurityDeterrents';
 import '../App.css';
 
 const INITIAL_RESUME = {
@@ -37,6 +39,8 @@ export default function BuilderPage() {
   const { resumeId }  = useParams();
   const [searchParams] = useSearchParams();
   const navigate       = useNavigate();
+
+  useSecurityDeterrents();
 
   const [resumeData,  setResumeData]  = useState(INITIAL_RESUME);
   const [currentId,   setCurrentId]   = useState(resumeId || null);
@@ -298,6 +302,7 @@ export default function BuilderPage() {
 
         {/* Preview */}
         <section className="app-content">
+          <ExpiryWarningBanner onUpgradeClick={() => setActiveModal('promo')} />
           <ResumePreview resumeData={resumeData} />
         </section>
       </main>

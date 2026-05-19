@@ -13,13 +13,13 @@ import {
 
 // these will be given by firebase on adding your web app
 const firebaseConfig = {
-  apiKey: "[GCP_API_KEY]",
-  authDomain: "airesume-d26e1.firebaseapp.com",
-  projectId: "airesume-54tge",
-  storageBucket: "airesume-d26e1.firebasestorage.app",
-  messagingSenderId: "280835018374",
-  appId: "1:534635452341363464:web:66et34y45244f335d8e3",
-  measurementId: "G-8Y0995464P",
+  apiKey: "ACP-KEY",
+  authDomain: "ai-resume-auth-64fc2.firebaseapp.com",
+  projectId: "ai-resume-auth-64fc2",
+  storageBucket: "ai-resume-auth-64fc2.firebasestorage.app",
+  messagingSenderId: "347090277771",
+  appId: "1:347090277771:web:e289082413d819d4990b8e",
+  measurementId: "G-Z9Z0T42CQ6",
 };
 
 const app = initializeApp(firebaseConfig);

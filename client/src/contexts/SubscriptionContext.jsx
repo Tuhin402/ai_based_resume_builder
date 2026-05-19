@@ -29,20 +29,28 @@ export function SubscriptionProvider({ children }) {
     subscription.periodEnd > now
   );
 
+  // ── Resume downloads ───────────────────────────────────────────────────────
   const downloadsUsed  = subscription?.downloadsUsed  ?? 0;
   const downloadsLimit = subscription?.downloadsLimit ?? 10;
   const downloadsLeft  = Math.max(0, downloadsLimit - downloadsUsed);
   const canDownload    = isPro && downloadsLeft > 0;
 
-  // Favourite templates: top-3 by usage count
-  const templateUsage   = subscription?.templateUsage ?? {};
+  // ── Cover letter downloads ─────────────────────────────────────────────────
+  const coverLetterDownloadsUsed  = subscription?.coverLetterDownloadsUsed  ?? 0;
+  const coverLetterDownloadsLimit = subscription?.coverLetterDownloadsLimit ?? 5;
+  const coverLetterDownloadsLeft  = Math.max(0, coverLetterDownloadsLimit - coverLetterDownloadsUsed);
+  const canDownloadCoverLetter    = isPro && coverLetterDownloadsLeft > 0;
+
+  // ── Favourite templates ────────────────────────────────────────────────────
+  const templateUsage      = subscription?.templateUsage ?? {};
   const favouriteTemplates = Object.entries(templateUsage)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(([id]) => id);
 
-  const periodEnd      = subscription?.periodEnd ?? null;
-  const daysRemaining  = periodEnd
+  // ── Days remaining ─────────────────────────────────────────────────────────
+  const periodEnd     = subscription?.periodEnd ?? null;
+  const daysRemaining = periodEnd
     ? Math.max(0, Math.ceil((periodEnd - now) / (1000 * 60 * 60 * 24)))
     : 0;
 
@@ -51,10 +59,17 @@ export function SubscriptionProvider({ children }) {
       subscription,
       subLoading,
       isPro,
+      // Resume
       downloadsUsed,
       downloadsLimit,
       downloadsLeft,
       canDownload,
+      // Cover letter
+      coverLetterDownloadsUsed,
+      coverLetterDownloadsLimit,
+      coverLetterDownloadsLeft,
+      canDownloadCoverLetter,
+      // Shared
       periodEnd,
       daysRemaining,
       favouriteTemplates,

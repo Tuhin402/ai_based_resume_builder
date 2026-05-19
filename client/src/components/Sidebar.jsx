@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   LayoutDashboard, PlusCircle, Upload, ChevronLeft,
-  ChevronRight, FileText, LogOut, Crown, Zap,
+  ChevronRight, FileText, LogOut, Crown, Zap, FileEdit,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,14 +10,20 @@ import LogoutModal from './LogoutModal';
 import './Sidebar.css';
 
 const NAV = [
-  { id: 'dashboard', label: 'My Resumes',   icon: LayoutDashboard, path: '/dashboard' },
-  { id: 'new',       label: 'Create Resume', icon: PlusCircle,      path: '/builder' },
-  { id: 'upload',    label: 'Upload Resume', icon: Upload,          path: '/builder?upload=1' },
+  { id: 'dashboard',    label: 'My Resumes',    icon: LayoutDashboard, path: '/dashboard' },
+  { id: 'new',          label: 'Create Resume',  icon: PlusCircle,      path: '/builder' },
+  { id: 'upload',       label: 'Upload Resume',  icon: Upload,          path: '/builder?upload=1' },
+  { id: 'cover-letter', label: 'Cover Letter',   icon: FileEdit,        path: '/cover-letter' },
 ];
 
 export default function Sidebar({ onUpgradeClick }) {
   const { user }   = useAuth();
-  const { isPro, downloadsLeft, downloadsLimit, daysRemaining } = useSubscription();
+  const {
+    isPro,
+    downloadsLeft, downloadsLimit,
+    coverLetterDownloadsLeft, coverLetterDownloadsLimit,
+    daysRemaining,
+  } = useSubscription();
   const navigate   = useNavigate();
   const location   = useLocation();
   const [collapsed, setCollapsed] = useState(
@@ -36,7 +42,8 @@ export default function Sidebar({ onUpgradeClick }) {
     location.pathname + location.search === path ||
     (path === '/dashboard' && location.pathname === '/dashboard');
 
-  const downloadsUsed = downloadsLimit - downloadsLeft;
+  const resumeUsed = downloadsLimit - downloadsLeft;
+  const clUsed     = coverLetterDownloadsLimit - coverLetterDownloadsLeft;
 
   return (
     <>
@@ -75,12 +82,28 @@ export default function Sidebar({ onUpgradeClick }) {
                 <div className="sidebar-sub-pro-header">
                   <Crown size={13} />
                   <span>Pro Plan</span>
-                  <span className="sidebar-sub-days">{daysRemaining}d left</span>
+                  <span className={`sidebar-sub-days ${daysRemaining <= 7 ? 'sidebar-sub-days-warn' : ''}`}>
+                    {daysRemaining}d left
+                  </span>
                 </div>
-                <div className="sidebar-sub-meter">
-                  <div className="sidebar-sub-meter-fill" style={{ width: `${Math.min(100, (downloadsUsed / downloadsLimit) * 100)}%` }} />
+
+                {/* Resume downloads meter */}
+                <div className="sidebar-sub-meter-row">
+                  <span className="sidebar-sub-meter-label-top">Resumes</span>
+                  <div className="sidebar-sub-meter">
+                    <div className="sidebar-sub-meter-fill" style={{ width: `${Math.min(100, (resumeUsed / downloadsLimit) * 100)}%` }} />
+                  </div>
+                  <span className="sidebar-sub-meter-label">{downloadsLeft}/{downloadsLimit}</span>
                 </div>
-                <span className="sidebar-sub-meter-label">{downloadsLeft}/{downloadsLimit} downloads left</span>
+
+                {/* Cover letter downloads meter */}
+                <div className="sidebar-sub-meter-row">
+                  <span className="sidebar-sub-meter-label-top">Cover Letters</span>
+                  <div className="sidebar-sub-meter">
+                    <div className="sidebar-sub-meter-fill sidebar-sub-meter-fill-cl" style={{ width: `${Math.min(100, (clUsed / coverLetterDownloadsLimit) * 100)}%` }} />
+                  </div>
+                  <span className="sidebar-sub-meter-label">{coverLetterDownloadsLeft}/{coverLetterDownloadsLimit}</span>
+                </div>
               </div>
             ) : (
               <button className="sidebar-sub-upgrade" onClick={onUpgradeClick} id="btn-sidebar-upgrade">

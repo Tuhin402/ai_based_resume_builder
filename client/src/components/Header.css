@@ -210,3 +210,22 @@
   .header-pro-badge span   { display: none; }
 }
 
+/* Cover Letter nav link */
+.header-nav-link {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.header-nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.05);
+}
+
+@media (max-width: 768px) {
+  .header-nav-link { display: none; }
+}

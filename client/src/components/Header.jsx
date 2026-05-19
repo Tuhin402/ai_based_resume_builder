@@ -63,6 +63,9 @@ export default function Header({ onUpgradeClick }) {
                     <span>Upgrade</span>
                   </button>
                 )}
+                <Link to="/cover-letter" className="header-nav-link" id="nav-cover-letter">
+                  Cover Letter
+                </Link>
                 <UserMenu onUpgradeClick={onUpgradeClick} />
               </>
             ) : (

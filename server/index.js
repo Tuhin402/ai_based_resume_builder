@@ -2,8 +2,9 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-const resumeRoutes = require("./routes/resumeRoutes");
-const stripeRoutes = require("./routes/stripeRoutes");
+const resumeRoutes      = require('./routes/resumeRoutes');
+const stripeRoutes      = require('./routes/stripeRoutes');
+const coverLetterRoutes = require('./routes/coverLetterRoutes');
 
 const app = express();
 
@@ -29,8 +30,9 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api", resumeRoutes);
-app.use("/api/stripe", stripeRoutes);
+app.use('/api', resumeRoutes);
+app.use('/api/stripe', stripeRoutes);
+app.use('/api/cover-letter', coverLetterRoutes);
 
 // --- Global error handler ---
 app.use((err, req, res, next) => {
